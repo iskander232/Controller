@@ -22,11 +22,6 @@
 
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>io.envoyproxy.controlplane</groupId>
-            <artifactId>java-control-plane</artifactId>
-            <version>0.1.30</version>
-        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -46,6 +41,11 @@
         <dependency>
             <groupId>io.envoyproxy.controlplane</groupId>
             <artifactId>cache</artifactId>
+            <version>0.1.28</version>
+        </dependency>
+        <dependency>
+            <groupId>io.envoyproxy.controlplane</groupId>
+            <artifactId>api</artifactId>
             <version>0.1.28</version>
         </dependency>
 
@@ -76,6 +76,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
         </dependency>
 
     </dependencies>

@@ -4,11 +4,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import controller.api.dto.ApiResponse;
+import controller.api.dto.EnvoyId;
 import io.envoyproxy.controlplane.cache.*;
 import io.envoyproxy.controlplane.cache.v3.Snapshot;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -25,23 +29,21 @@ import java.util.stream.Collectors;
 import static io.envoyproxy.controlplane.cache.Resources.RESOURCE_TYPES_IN_ORDER;
 
 @Slf4j
-@Component
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class SimpleSnapshot implements ConfigWatcher {
 
-    private final NodeGroup<String> groups;
+    NodeGroup<String> groups;
 
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private final Lock readLock = lock.readLock();
-    private final Lock writeLock = lock.writeLock();
+    ReadWriteLock lock = new ReentrantReadWriteLock();
+    Lock readLock = lock.readLock();
 
-    private AtomicLong watchCount = new AtomicLong();
+    AtomicLong watchCount = new AtomicLong();
 
-    private final SnapshotsManager snapshotsManager;
-    private final ConcurrentMap<String, ConcurrentMap<Resources.ResourceType, CacheStatusInfo<String>>> statuses =
-            new ConcurrentHashMap<>();
+    ServiceDiscoveryClient serviceDiscoveryClient;
+    ConcurrentMap<String, ConcurrentMap<Resources.ResourceType, CacheStatusInfo<String>>> statuses = new ConcurrentHashMap<>();
 
-    public SimpleSnapshot(SnapshotsManager snapshotsManager) {
-        this.snapshotsManager = snapshotsManager;
+    public SimpleSnapshot(ServiceDiscoveryClient serviceDiscoveryClient) {
+        this.serviceDiscoveryClient = serviceDiscoveryClient;
         this.groups = new NodeGroup<>() {
             @Override
             public String hash(io.envoyproxy.envoy.api.v2.core.Node node) {
@@ -50,22 +52,13 @@ public class SimpleSnapshot implements ConfigWatcher {
 
             @Override
             public String hash(io.envoyproxy.envoy.config.core.v3.Node node) {
-                return String.format("cluster - %s, id - %s", node.getCluster(), node.getId());
+                return Utils.hash(node);
             }
         };
     }
 
-    public void setSnapshot(String group, io.envoyproxy.controlplane.cache.v3.Snapshot snapshot) {
-        // we take a writeLock to prevent watches from being created while we update the snapshot
-        ConcurrentMap<Resources.ResourceType, CacheStatusInfo<String>> status;
-        writeLock.lock();
-        try {
-            // Update the existing snapshot entry.
-            snapshotsManager.set(group, snapshot);
-            status = statuses.get(group);
-        } finally {
-            writeLock.unlock();
-        }
+    public void setSnapshot(EnvoyId envoyId, Snapshot snapshot) {
+        ConcurrentMap<Resources.ResourceType, CacheStatusInfo<String>> status = statuses.get(Utils.hash(envoyId));;
 
         if (status == null) {
             return;
@@ -73,10 +66,10 @@ public class SimpleSnapshot implements ConfigWatcher {
 
         // Responses should be in specific order and typeUrls has a list of resources in the right
         // order.
-        respondWithSpecificOrder(group, snapshot, status);
+        respondWithSpecificOrder(envoyId, snapshot, status);
     }
 
-    protected void respondWithSpecificOrder(String group,
+    protected void respondWithSpecificOrder(EnvoyId envoyId,
                                             Snapshot snapshot,
                                             ConcurrentMap<Resources.ResourceType, CacheStatusInfo<String>> statusMap)
     {
@@ -101,7 +94,8 @@ public class SimpleSnapshot implements ConfigWatcher {
                             version);
                     }
 
-                    respond(watch, snapshot, group);
+                    ApiResponse response = respond(watch, snapshot, envoyId);
+                    serviceDiscoveryClient.updateStatus(response);
 
                     // Discard the watch. A new watch will be created for future snapshots once envoy ACKs the response.
                     return true;
@@ -123,7 +117,7 @@ public class SimpleSnapshot implements ConfigWatcher {
     {
         Resources.ResourceType requestResourceType = request.getResourceType();
         Preconditions.checkNotNull(requestResourceType, "unsupported type URL %s",
-                request.getTypeUrl());
+            request.getTypeUrl());
         String group = groups.hash(request.v3Request().getNode());
 
         // even though we're modifying, we take a readLock to allow multiple watches to be created in parallel since it
@@ -131,12 +125,27 @@ public class SimpleSnapshot implements ConfigWatcher {
         readLock.lock();
         try {
             CacheStatusInfo<String> status = statuses.computeIfAbsent(group, g -> new ConcurrentHashMap<>())
-                    .computeIfAbsent(requestResourceType, s -> new CacheStatusInfo<>(group));
+                .computeIfAbsent(requestResourceType, s -> new CacheStatusInfo<>(group));
             status.setLastWatchRequestTime(System.currentTimeMillis());
 
-            Snapshot snapshot = snapshotsManager.get(group);
+            Snapshot snapshot;
+            if (request.hasErrorDetail()) {
+                serviceDiscoveryClient.updateStatus(ApiResponse.builder()
+                .version(request.getVersionInfo())
+                .error(request.v3Request().getErrorDetail().getMessage())
+                    .envoy_id(EnvoyId.builder()
+                        .cluster_id(request.v3Request().getNode().getCluster())
+                        .node_id(request.v3Request().getNode().getId())
+                        .build())
+                .resources(request.v3Request().getResourceNamesList())
+                .build());
+                snapshot = null;
+            } else {
+                snapshot = serviceDiscoveryClient.getSnapshot(request.v3Request().getNode());
+            }
+
             String version = snapshot == null ? "" : snapshot.version(requestResourceType,
-                    request.getResourceNamesList());
+                request.getResourceNamesList());
 
             Watch watch = new Watch(ads, request, responseConsumer);
 
@@ -150,16 +159,17 @@ public class SimpleSnapshot implements ConfigWatcher {
                     // If any of the newly requested resources are in the snapshot respond immediately. If not we'll fall back to
                     // version comparisons.
                     if (snapshot.resources(requestResourceType)
-                            .keySet()
-                            .stream()
-                            .anyMatch(newResourceHints::contains)) {
-                        respond(watch, snapshot, group);
+                        .keySet()
+                        .stream()
+                        .anyMatch(newResourceHints::contains)
+                    ) {
+                        respond(watch, snapshot, Utils.nodeToId(request.v3Request().getNode()));
 
                         return watch;
                     }
                 } else if (hasClusterChanged
                         && (requestResourceType.equals(Resources.ResourceType.ENDPOINT))) {
-                    respond(watch, snapshot, group);
+                    respond(watch, snapshot, Utils.nodeToId(request.v3Request().getNode()));
 
                     return watch;
                 }
@@ -186,9 +196,10 @@ public class SimpleSnapshot implements ConfigWatcher {
             }
 
             // Otherwise, the watch may be responded immediately
-            boolean responded = respond(watch, snapshot, group);
+            ApiResponse response = respond(watch, snapshot, Utils.nodeToId(request.v3Request().getNode()));
+            serviceDiscoveryClient.updateStatus(response);
 
-            if (!responded) {
+            if (response.getVersion() == null) {
                 long watchId = watchCount.incrementAndGet();
 
                 if (log.isDebugEnabled()) {
@@ -211,63 +222,72 @@ public class SimpleSnapshot implements ConfigWatcher {
         }
     }
 
-    private boolean respond(Watch watch, Snapshot snapshot, String group) {
+    @Nonnull
+    private ApiResponse respond(Watch watch, Snapshot snapshot, EnvoyId envoyId) {
         Map<String, ? extends Message> snapshotResources = snapshot.resources(watch.request().getResourceType());
 
         if (!watch.request().getResourceNamesList().isEmpty() && watch.ads()) {
             Collection<String> missingNames = watch.request().getResourceNamesList().stream()
-                    .filter(name -> !snapshotResources.containsKey(name))
-                    .collect(Collectors.toList());
+                .filter(name -> !snapshotResources.containsKey(name))
+                .collect(Collectors.toList());
 
             if (!missingNames.isEmpty()) {
                 log.info(
                     "not responding in ADS mode for {} from node {} at version {} for request [{}] since [{}] not in snapshot",
                     watch.request().getTypeUrl(),
-                    group,
+                    Utils.hash(envoyId),
                     snapshot.version(watch.request().getResourceType(), watch.request().getResourceNamesList()),
                     String.join(", ", watch.request().getResourceNamesList()),
                     String.join(", ", missingNames));
 
-                return false;
+                return ApiResponse.builder()
+                    .envoy_id(envoyId)
+                    .build();
             }
         }
 
         String version = snapshot.version(watch.request().getResourceType(),
-                watch.request().getResourceNamesList());
+            watch.request().getResourceNamesList());
 
         log.debug("responding for {} from node {} at version {} with version {}",
-                watch.request().getTypeUrl(),
-                group,
-                watch.request().getVersionInfo(),
-                version);
+            watch.request().getTypeUrl(),
+            envoyId,
+            watch.request().getVersionInfo(),
+            version);
 
         Response response = createResponse(
-                watch.request(),
-                snapshotResources,
-                version);
+            watch.request(),
+            snapshotResources,
+            version);
 
         try {
             watch.respond(response);
-            return true;
+            return ApiResponse.builder()
+                .envoy_id(envoyId)
+                .version(response.version())
+                .resources(response.resources().stream().map(Message::toString).collect(Collectors.toList()))
+                .build();
         } catch (WatchCancelledException e) {
             log.error(
-                    "failed to respond for {} from node {} at version {} with version {} because watch was already cancelled",
-                    watch.request().getTypeUrl(),
-                    group,
-                    watch.request().getVersionInfo(),
-                    version);
+                "failed to respond for {} from node {} at version {} with version {} because watch was already cancelled",
+                watch.request().getTypeUrl(),
+                envoyId,
+                watch.request().getVersionInfo(),
+                version);
         }
 
-        return false;
+        return ApiResponse.builder()
+            .envoy_id(envoyId)
+            .build();
     }
 
     private Response createResponse(XdsRequest request, Map<String, ? extends Message> resources, String version) {
         Collection<? extends Message> filtered = request.getResourceNamesList().isEmpty()
-                ? resources.values()
-                : request.getResourceNamesList().stream()
-                .map(resources::get)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+            ? resources.values()
+            : request.getResourceNamesList().stream()
+            .map(resources::get)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
 
         return Response.create(request, filtered, version);
     }

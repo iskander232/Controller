@@ -1,19 +1,23 @@
 package controller.api.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.protobuf.Duration;
 import io.envoyproxy.envoy.config.cluster.v3.Cluster;
-import io.envoyproxy.envoy.config.core.v3.Address;
-import io.envoyproxy.envoy.config.core.v3.SocketAddress;
 import io.envoyproxy.envoy.config.endpoint.v3.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NonNull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Builder
+@Data
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ClusterDto {
     @NonNull
     private String name;
@@ -47,5 +51,14 @@ public class ClusterDto {
         endpoints.forEach(builder::addLbEndpoints);
 
         return builder.build();
+    }
+
+    public ClusterDto(EndpointDto endpointDto, String clusterName) {
+        this.name = clusterName;
+        this.endpointDtos = Collections.singletonList(endpointDto);
+    }
+
+    public void addEndpoint(EndpointDto endpointDto) {
+        endpointDtos.add(endpointDto);
     }
 }

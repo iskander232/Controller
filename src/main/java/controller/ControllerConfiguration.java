@@ -1,24 +1,28 @@
 package controller;
 
-import io.envoyproxy.controlplane.cache.NodeGroup;
-import io.envoyproxy.controlplane.cache.v3.Snapshot;
 import io.envoyproxy.controlplane.server.V3DiscoveryServer;
 import io.grpc.BindableService;
-import net.devh.boot.grpc.server.serverfactory.GrpcServerConfigurer;
 import net.devh.boot.grpc.server.service.GrpcService;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@org.springframework.context.annotation.Configuration
-public class Configuration {
+@Configuration
+public class ControllerConfiguration {
 
     @Bean
-    public SnapshotsManager snapshotsManager() {
-        return new SnapshotsManager();
+    public ServiceDiscoveryClient serviceDiscoveryClient(RestTemplateBuilder restTemplateBuilder) {
+        return new ServiceDiscoveryClient(restTemplateBuilder);
     }
 
     @Bean
-    public SimpleSnapshot getSimpleSnapshot(SnapshotsManager snapshotsManager) {
-        return new SimpleSnapshot(snapshotsManager);
+    public SimpleSnapshot simpleSnapshot(ServiceDiscoveryClient serviceDiscoveryClient) {
+        return new SimpleSnapshot(serviceDiscoveryClient);
+    }
+
+    @Bean
+    public ApiRequestsQueue apiRequestsQueue(SimpleSnapshot simpleSnapshot) {
+        return new ApiRequestsQueue(simpleSnapshot);
     }
 
     @Bean
