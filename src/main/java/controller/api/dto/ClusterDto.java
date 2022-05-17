@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,7 +56,8 @@ public class ClusterDto {
 
     public ClusterDto(EndpointDto endpointDto, String clusterName) {
         this.name = clusterName;
-        this.endpointDtos = Collections.singletonList(endpointDto);
+        this.endpointDtos = new ArrayList<>();
+        addEndpoint(endpointDto);
     }
 
     public void addEndpoint(EndpointDto endpointDto) {
