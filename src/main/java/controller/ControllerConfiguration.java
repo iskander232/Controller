@@ -34,24 +34,4 @@ public class ControllerConfiguration {
     public BindableService x1(V3DiscoveryServer v3DiscoveryServer) {
         return v3DiscoveryServer.getAggregatedDiscoveryServiceImpl();
     }
-
-    @GrpcService
-    public BindableService x2(V3DiscoveryServer v3DiscoveryServer) {
-        return v3DiscoveryServer.getClusterDiscoveryServiceImpl();
-    }
-
-    @GrpcService
-    public BindableService x3(V3DiscoveryServer v3DiscoveryServer) {
-        return v3DiscoveryServer.getEndpointDiscoveryServiceImpl();
-    }
-
-    @GrpcService
-    public BindableService x4(V3DiscoveryServer v3DiscoveryServer) {
-        return v3DiscoveryServer.getListenerDiscoveryServiceImpl();
-    }
-
-    @GrpcService
-    public BindableService x5(V3DiscoveryServer v3DiscoveryServer) {
-        return v3DiscoveryServer.getRouteDiscoveryServiceImpl();
-    }
 }
