@@ -16,18 +16,18 @@ public class ControllerConfiguration {
     }
 
     @Bean
-    public SimpleSnapshot simpleSnapshot(ServiceDiscoveryClient serviceDiscoveryClient) {
-        return new SimpleSnapshot(serviceDiscoveryClient);
+    public ConfigWatcherImpl configWatcherImpl(ServiceDiscoveryClient serviceDiscoveryClient) {
+        return new ConfigWatcherImpl(serviceDiscoveryClient);
     }
 
     @Bean
-    public ApiRequestsQueue apiRequestsQueue(SimpleSnapshot simpleSnapshot) {
-        return new ApiRequestsQueue(simpleSnapshot);
+    public AddConfigRequestsQueue addConfigRequestsQueue(ConfigWatcherImpl configWatcherImpl) {
+        return new AddConfigRequestsQueue(configWatcherImpl);
     }
 
     @Bean
-    public V3DiscoveryServer v3DiscoveryServer(SimpleSnapshot simpleSnapshot) {
-        return new V3DiscoveryServer(simpleSnapshot);
+    public V3DiscoveryServer v3DiscoveryServer(ConfigWatcherImpl configWatcherImpl) {
+        return new V3DiscoveryServer(configWatcherImpl);
     }
 
     @GrpcService

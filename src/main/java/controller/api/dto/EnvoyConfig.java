@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Data
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class ApiRequestPart {
+public class EnvoyConfig {
     String version;
     EnvoyId envoy_id;
     EndpointDto monitoring_endpoint;

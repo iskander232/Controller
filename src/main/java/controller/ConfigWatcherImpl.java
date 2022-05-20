@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
-import controller.api.dto.ApiResponse;
+import controller.api.dto.ConfigUpdateStatusResponseRaw;
 import controller.api.dto.EnvoyId;
 import io.envoyproxy.controlplane.cache.*;
 import io.envoyproxy.controlplane.cache.v3.Snapshot;
@@ -30,7 +30,7 @@ import static io.envoyproxy.controlplane.cache.Resources.RESOURCE_TYPES_IN_ORDER
 
 @Slf4j
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class SimpleSnapshot implements ConfigWatcher {
+public class ConfigWatcherImpl implements ConfigWatcher {
 
     NodeGroup<String> groups;
 
@@ -42,7 +42,7 @@ public class SimpleSnapshot implements ConfigWatcher {
     ServiceDiscoveryClient serviceDiscoveryClient;
     ConcurrentMap<String, ConcurrentMap<Resources.ResourceType, CacheStatusInfo<String>>> statuses = new ConcurrentHashMap<>();
 
-    public SimpleSnapshot(ServiceDiscoveryClient serviceDiscoveryClient) {
+    public ConfigWatcherImpl(ServiceDiscoveryClient serviceDiscoveryClient) {
         this.serviceDiscoveryClient = serviceDiscoveryClient;
         this.groups = new NodeGroup<>() {
             @Override
@@ -94,7 +94,7 @@ public class SimpleSnapshot implements ConfigWatcher {
                             version);
                     }
 
-                    ApiResponse response = respond(watch, snapshot, envoyId);
+                    ConfigUpdateStatusResponseRaw response = respond(watch, snapshot, envoyId);
                     serviceDiscoveryClient.updateStatus(response);
 
                     // Discard the watch. A new watch will be created for future snapshots once envoy ACKs the response.
@@ -130,7 +130,7 @@ public class SimpleSnapshot implements ConfigWatcher {
 
             Snapshot snapshot;
             if (request.hasErrorDetail()) {
-                serviceDiscoveryClient.updateStatus(ApiResponse.builder()
+                serviceDiscoveryClient.updateStatus(ConfigUpdateStatusResponseRaw.builder()
                 .version(request.getVersionInfo())
                 .error(request.v3Request().getErrorDetail().getMessage())
                     .envoy_id(EnvoyId.builder()
@@ -196,7 +196,7 @@ public class SimpleSnapshot implements ConfigWatcher {
             }
 
             // Otherwise, the watch may be responded immediately
-            ApiResponse response = respond(watch, snapshot, Utils.nodeToId(request.v3Request().getNode()));
+            ConfigUpdateStatusResponseRaw response = respond(watch, snapshot, Utils.nodeToId(request.v3Request().getNode()));
             serviceDiscoveryClient.updateStatus(response);
 
             if (response.getVersion() == null) {
@@ -223,7 +223,7 @@ public class SimpleSnapshot implements ConfigWatcher {
     }
 
     @Nonnull
-    private ApiResponse respond(Watch watch, Snapshot snapshot, EnvoyId envoyId) {
+    private ConfigUpdateStatusResponseRaw respond(Watch watch, Snapshot snapshot, EnvoyId envoyId) {
         Map<String, ? extends Message> snapshotResources = snapshot.resources(watch.request().getResourceType());
 
         if (!watch.request().getResourceNamesList().isEmpty() && watch.ads()) {
@@ -240,7 +240,7 @@ public class SimpleSnapshot implements ConfigWatcher {
                     String.join(", ", watch.request().getResourceNamesList()),
                     String.join(", ", missingNames));
 
-                return ApiResponse.builder()
+                return ConfigUpdateStatusResponseRaw.builder()
                     .envoy_id(envoyId)
                     .build();
             }
@@ -262,7 +262,7 @@ public class SimpleSnapshot implements ConfigWatcher {
 
         try {
             watch.respond(response);
-            return ApiResponse.builder()
+            return ConfigUpdateStatusResponseRaw.builder()
                 .envoy_id(envoyId)
                 .version(response.version())
                 .resources(response.resources().stream().map(Message::toString).collect(Collectors.toList()))
@@ -276,7 +276,7 @@ public class SimpleSnapshot implements ConfigWatcher {
                 version);
         }
 
-        return ApiResponse.builder()
+        return ConfigUpdateStatusResponseRaw.builder()
             .envoy_id(envoyId)
             .build();
     }

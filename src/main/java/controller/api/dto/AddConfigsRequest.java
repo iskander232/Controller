@@ -5,15 +5,12 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.Collection;
+import java.util.List;
 
 @Data
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class ApiResponse {
-
-    EnvoyId envoy_id;
+public class AddConfigsRequest {
     String version;
-    Collection<String> resources;
-    String error;
+    List<EnvoyConfig> configs;
 }

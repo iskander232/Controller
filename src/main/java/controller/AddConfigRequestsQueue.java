@@ -1,7 +1,7 @@
 package controller;
 
-import controller.api.dto.ApiRequestPart;
-import controller.api.dto.Apirequest;
+import controller.api.dto.EnvoyConfig;
+import controller.api.dto.AddConfigsRequest;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -9,23 +9,23 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ApiRequestsQueue {
+public class AddConfigRequestsQueue {
 
     ReentrantLock lock = new ReentrantLock();
-    Deque<ApiRequestPart> snapshotDeque = new ArrayDeque<>();
-    SimpleSnapshot simpleSnapshot;
+    Deque<EnvoyConfig> snapshotDeque = new ArrayDeque<>();
+    ConfigWatcherImpl configWatcherImpl;
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     boolean isProcessing = false;
 
-    ApiRequestsQueue(SimpleSnapshot simpleSnapshot) {
-        this.simpleSnapshot = simpleSnapshot;
+    AddConfigRequestsQueue(ConfigWatcherImpl configWatcherImpl) {
+        this.configWatcherImpl = configWatcherImpl;
     }
 
-    public void addApiRequest(Apirequest apiRequest) {
+    public void addApiRequest(AddConfigsRequest apiRequest) {
         lock.lock();
         try {
-            for (ApiRequestPart p: apiRequest.getConfigs()) {
+            for (EnvoyConfig p: apiRequest.getConfigs()) {
                 p.setVersion(apiRequest.getVersion());
                 snapshotDeque.addLast(p);
             }
@@ -39,7 +39,7 @@ public class ApiRequestsQueue {
     }
 
     private void readNext() {
-        ApiRequestPart apiRequest;
+        EnvoyConfig apiRequest;
         while (true) {
             lock.lock();
             try {
@@ -52,7 +52,7 @@ public class ApiRequestsQueue {
                 lock.unlock();
             }
 
-            simpleSnapshot.setSnapshot(apiRequest.getEnvoy_id(), apiRequest.buildSnapshot());
+            configWatcherImpl.setSnapshot(apiRequest.getEnvoy_id(), apiRequest.buildSnapshot());
         }
     }
 }
