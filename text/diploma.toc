@@ -1,0 +1,16 @@
+\selectlanguage *{russian}
+\contentsline {section}{\numberline {1}Введение}{4}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Проблемы микросервисной архитектуры}{4}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Service Mesh}{5}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Существующие решения}{6}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Цель и задачи}{8}{subsection.1.4}%
+\contentsline {section}{\numberline {2}Разработанное решение}{9}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Архитектура Service Mesh}{9}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Выбор proxy для Data Plane}{11}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Конфигурация Envoy}{14}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Изначальная настройка конфигурации Envoy}{16}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Протокол общения между Envoy и Controller}{21}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Архитектура созданного приложения}{23}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Тестирование}{26}{subsection.2.7}%
+\contentsline {section}{\numberline {3}Результаты}{29}{section.3}%
+\contentsline {section}{\numberline {4}Заключение}{29}{section.4}%

@@ -1,0 +1,167 @@
+\documentclass[14pt]{extarticle}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\usepackage[a4paper, % Согласно требованиям к ВКР
+  lmargin=30mm, rmargin=15mm, tmargin=20mm, bmargin=20mm]{geometry}
+\usepackage{multirow}
+
+
+\setdefaultlanguage{russian}
+\setotherlanguage{english}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+% Согласно требованиям к ВКР
+\defaultfontfeatures{Ligatures=TeX}
+
+\setmainfont{Times New Roman}
+\setmonofont{Courier New}
+\setsansfont{Arial}
+
+\newfontfamily\cyrillicfont{Times New Roman}
+\newfontfamily\cyrillicfontsf{Arial}
+\newfontfamily\cyrillicfonttt{Courier New}
+
+\newfontfamily\englishfont{Times New Roman}
+\newfontfamily\englishfontsf{Arial}
+\newfontfamily\englishfonttt{Courier New}
+
+\linespread{1.5}
+
+\usepackage[backend=biber,
+  bibencoding=utf8,
+  sorting=none,
+  style=gost-numeric,
+  language=autobib,
+  autolang=other,
+  clearlang=true,
+  defernumbers=true,
+  sortcites=true,
+  doi=true,
+  isbn=true,
+  ]{biblatex}
+
+\bibliography{bibliography.bib}
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage[hidelinks,colorlinks=true,citecolor=BurntOrange,urlcolor=Blue]{hyperref}
+\renewcommand{\UrlFont}{\small\rmfamily\tt}
+
+
+\renewcommand\thesection{\arabic{section}}
+
+\usepackage{amsfonts}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{wrapfig}
+
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+
+\renewcommand*{\maketitle}{
+\begin{titlepage}
+  \begin{center}
+    \linespread{1}
+    \small
+    Федеральное государственное автономное образовательное учреждение\break высшего образования\par
+    <<Московский физико-технический институт \break (национальный исследовательский университет)>>\par
+    Физтех-школа Прикладной Математики и Информатики\par
+    Кафедра корпоративных информационных систем\par
+  \end{center}
+%
+  {
+    \small
+    {\bf Направление подготовки / специальность}: 01.03.02 Прикладная математика и информатика\newline
+    {\bf Направленность (профиль) подготовки}: Прикладная математика и компьютерные науки
+  }
+%
+  {
+    \topskip0pt
+    \vspace*{\fill}
+    \begin{center}
+      {\bf\Large РАЗРАБОТКА ПОДСИСТЕМЫ, ОТВЕЧАЮЩЕЙ ЗА ИЗМЕНЕНИЯ КОНФИГУРАЦИИ СЕРВИСОВ ДЛЯ SERVICE MESH
+      \break }\par
+      (бакалаврская работа)
+    \end{center}
+    \vspace*{\fill}
+  }
+%
+  \hfill
+  \begin{minipage}[t]{8cm}
+    {\bf Студент: \newline}
+    Сагитов Искандер Рустамович\newline
+    \vspace{-3mm}
+    \rule{8cm}{0.15mm}
+    \centerline{\scriptsize\it (подпись студента)}\newline
+%
+    {\bf Научный руководитель: \newline}
+    Шмарион Максим Юрьевич\newline
+    \vspace{-3mm}
+    \rule{8cm}{0.15mm}
+    \centerline{\scriptsize\it (подпись научного руководителя)}\newline
+%
+    {\bf Научный консультант: \newline}
+    Буланкин Данил Андреевич \newline
+    \vspace{-3mm}
+    \rule{8cm}{0.15mm}
+    \centerline{\scriptsize\it (подпись научного консультанта)}
+%
+  \end{minipage}
+
+    \vspace*{\fill}
+    \begin{center}
+      Москва 2022
+    \end{center}
+\end{titlepage}
+}
+
+
+\begin{document}
+\maketitle
+
+\newpage
+\setcounter{page}{2}
+
+\vspace*{\fill}
+\begin{abstract}
+
+Данная работа посвящена иследованию существующих решений Service Mesh и проектированию архитектуры для собственной реализации данного приложения. Также в работе реализуется часть спроектированного Service Mesh такие как набора инструментов для упрощенного создания прокси для управления всем траффиком в сети, где будет работать Service Mesh и подсистема Controller, отвечающая за доставление необходимых настроек до этих прокси.\end{abstract}
+\vspace*{\fill}
+
+\newpage
+\tableofcontents
+\newpage
+
+\include{diploma/intro}
+\include{diploma/main}
+\include{diploma/results}
+\include{diploma/conclusion}
+
+\newpage
+\printbibliography[title=Источники]
+\end{document}

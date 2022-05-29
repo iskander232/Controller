@@ -1,0 +1,97 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{nginx}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=61106372b4689a85ba467e21df5f7edb}{%
+           family={{F5 Networks}},
+           familyi={F\bibinitperiod}}}%
+      }
+      \strng{namehash}{61106372b4689a85ba467e21df5f7edb}
+      \strng{fullhash}{61106372b4689a85ba467e21df5f7edb}
+      \strng{bibnamehash}{61106372b4689a85ba467e21df5f7edb}
+      \strng{authorbibnamehash}{61106372b4689a85ba467e21df5f7edb}
+      \strng{authornamehash}{61106372b4689a85ba467e21df5f7edb}
+      \strng{authorfullhash}{61106372b4689a85ba467e21df5f7edb}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Nginx}
+      \verb{urlraw}
+      \verb https://www.nginx.com
+      \endverb
+      \verb{url}
+      \verb https://www.nginx.com
+      \endverb
+    \endentry
+    \entry{HAProxy}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=da61d7ebf6aa78cc3e3559fdbdbe5462}{%
+           family={{HAProxy Technologies, LLC}},
+           familyi={H\bibinitperiod}}}%
+      }
+      \strng{namehash}{da61d7ebf6aa78cc3e3559fdbdbe5462}
+      \strng{fullhash}{da61d7ebf6aa78cc3e3559fdbdbe5462}
+      \strng{bibnamehash}{da61d7ebf6aa78cc3e3559fdbdbe5462}
+      \strng{authorbibnamehash}{da61d7ebf6aa78cc3e3559fdbdbe5462}
+      \strng{authornamehash}{da61d7ebf6aa78cc3e3559fdbdbe5462}
+      \strng{authorfullhash}{da61d7ebf6aa78cc3e3559fdbdbe5462}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{HAProxy}
+      \verb{urlraw}
+      \verb https://www.haproxy.org
+      \endverb
+      \verb{url}
+      \verb https://www.haproxy.org
+      \endverb
+    \endentry
+    \entry{Envoy}{misc}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{title}{Envoy}
+      \verb{urlraw}
+      \verb https://www.envoyproxy.io
+      \endverb
+      \verb{url}
+      \verb https://www.envoyproxy.io
+      \endverb
+    \endentry
+    \entry{EnvoyControlPlane}{misc}{}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labeltitlesource}{title}
+      \field{title}{Envoy java-control-plane}
+      \verb{urlraw}
+      \verb https://github.com/envoyproxy/java-control-plane
+      \endverb
+      \verb{url}
+      \verb https://github.com/envoyproxy/java-control-plane
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

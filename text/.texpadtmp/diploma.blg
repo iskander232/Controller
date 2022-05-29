@@ -1,0 +1,15 @@
+[0] Config.pm:307> INFO - This is Biber 2.17
+[0] Config.pm:310> INFO - Logfile is '/Users/sagitovir/Desktop/Study/diploma/text/.texpadtmp/diploma.blg'
+[75] biber-darwin:340> INFO - === Fri May 27, 2022, 14:07:20
+[94] Biber.pm:418> INFO - Reading '/Users/sagitovir/Desktop/Study/diploma/text/.texpadtmp/diploma.bcf'
+[221] Biber.pm:972> INFO - Found 4 citekeys in bib section 0
+[236] Biber.pm:4383> INFO - Processing section 0
+[245] Biber.pm:4574> INFO - Looking for bibtex file '/Users/sagitovir/Desktop/Study/diploma/text/bibliography.bib' for section 0
+[254] bibtex.pm:1713> INFO - LaTeX decoding ...
+[287] bibtex.pm:1518> INFO - Found BibTeX data source '/Users/sagitovir/Desktop/Study/diploma/text/bibliography.bib'
+[307] UCollate.pm:68> INFO - Overriding locale 'ru-RU' defaults 'variable = shifted' with 'variable = non-ignorable'
+[307] UCollate.pm:68> INFO - Overriding locale 'ru-RU' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[307] Biber.pm:4203> INFO - Sorting list 'none/global//global/global' of type 'entry' with template 'none' and locale 'ru-RU'
+[307] Biber.pm:4209> INFO - No sort tailoring available for locale 'ru-RU'
+[315] bbl.pm:654> INFO - Writing '/Users/sagitovir/Desktop/Study/diploma/text/.texpadtmp/diploma.bbl' with encoding 'UTF-8'
+[316] bbl.pm:757> INFO - Output to /Users/sagitovir/Desktop/Study/diploma/text/.texpadtmp/diploma.bbl
